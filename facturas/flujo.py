@@ -98,9 +98,10 @@ def procesar_fichero(ruta: Path, rutas: Rutas, almacen: Almacen) -> Resultado:
     almacen.guardar(r)
 
     if r.estado == Estado.VALIDA:
-        log.info("✔ %s → %s (%s, %s €)", ruta.name, destino.parent.name, r.factura.numero, r.factura.total)
+        log.info("[OK]       %s -> %s (%s, %s €)%s", ruta.name, destino.parent.name, r.factura.numero, r.factura.total,
+                 "  [leída con OCR]" if r.origen_texto == "ocr" else "")
     else:
-        log.warning("✖ %s → revisión: %s", ruta.name, "; ".join(r.incidencias))
+        log.warning("[REVISIÓN] %s: %s", ruta.name, "; ".join(r.incidencias))
     return r
 
 

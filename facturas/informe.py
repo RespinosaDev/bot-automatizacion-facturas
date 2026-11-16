@@ -54,9 +54,10 @@ def generar_informe(facturas: list[dict], salida: str | Path) -> Path:
 
     ws = wb.active
     ws.title = "Facturas válidas"
-    _hoja(ws, ["Nº factura", "Fecha", "Emisor", "NIF emisor", "Base", "IVA %", "Cuota IVA", "Total", "Fichero"],
+    _hoja(ws, ["Nº factura", "Fecha", "Emisor", "NIF emisor", "Base", "IVA %", "Cuota IVA", "Total", "Lectura", "Fichero"],
           [[f["numero"], _fecha(f["fecha"]), f["emisor"], f["nif_emisor"], _num(f["base"]), _num(f["tipo_iva"]),
-            _num(f["cuota_iva"]), _num(f["total"]), f["fichero"]] for f in validas],
+            _num(f["cuota_iva"]), _num(f["total"]), "OCR" if f["origen_texto"] == "ocr" else "PDF", f["fichero"]]
+           for f in validas],
           columnas_euro=(5, 7, 8), columnas_fecha=(2,))
 
     ws = wb.create_sheet("En revisión")

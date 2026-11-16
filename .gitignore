@@ -10,3 +10,4 @@ datos/*/*
 !datos/*/.gitkeep
 informes/
 *.db
+ocr/tessdata/

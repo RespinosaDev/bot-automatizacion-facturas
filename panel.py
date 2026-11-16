@@ -19,8 +19,8 @@ RAIZ = Path(__file__).resolve().parent
 rutas = Rutas(RAIZ / "datos")
 rutas.crear()
 
-st.set_page_config(page_title="Bot de facturas", page_icon="🧾", layout="wide")
-st.title("🧾 Bot de automatización de facturas")
+st.set_page_config(page_title="Bot de facturas", layout="wide")
+st.title("Bot de automatización de facturas")
 st.caption("Sube facturas en PDF: el bot extrae los datos, los valida y separa las que necesitan revisión.")
 
 # ---------------------------------------------------------------- barra lateral
@@ -34,7 +34,7 @@ with st.sidebar:
 
     pendientes = sorted(p.name for p in rutas.entrada.iterdir() if p.suffix.lower() == ".pdf")
     st.write(f"**Pendientes:** {len(pendientes)}")
-    if st.button("▶ Procesar pendientes", type="primary", width="stretch", disabled=not pendientes):
+    if st.button("Procesar pendientes", type="primary", width="stretch", disabled=not pendientes):
         res = procesar_carpeta(rutas)
         st.success(f"{len(res)} procesada(s): {sum(r.estado.value == 'valida' for r in res)} válida(s)")
 
@@ -48,7 +48,7 @@ with st.sidebar:
         st.rerun()
 
     st.divider()
-    st.caption("OCR para escaneados: " + ("✅ disponible" if ocr_disponible() else "❌ instala Tesseract"))
+    st.caption("OCR para escaneados: " + ("disponible" if ocr_disponible() else "no disponible (instala Tesseract)"))
 
 # ---------------------------------------------------------------- datos
 with Almacen(rutas.bd) as a:
@@ -71,25 +71,26 @@ k2.metric("Válidas", len(validas))
 k3.metric("En revisión", len(revision))
 k4.metric("Importe válido", f"{validas['total'].sum():,.2f} €".replace(",", "X").replace(".", ",").replace("X", "."))
 
-pest_validas, pest_revision, pest_graficos = st.tabs(["✔ Válidas", f"⚠ En revisión ({len(revision)})", "📊 Gráficos"])
+pest_validas, pest_revision, pest_graficos = st.tabs(["Válidas", f"En revisión ({len(revision)})", "Gráficos"])
 
 with pest_validas:
     st.dataframe(
-        validas[["numero", "fecha", "emisor", "nif_emisor", "base", "tipo_iva", "cuota_iva", "total", "fichero"]],
+        validas.assign(lectura=validas["origen_texto"].map({"pdf": "Texto del PDF", "ocr": "OCR (escaneada)"}))
+        [["numero", "fecha", "emisor", "nif_emisor", "base", "tipo_iva", "cuota_iva", "total", "lectura", "fichero"]],
         hide_index=True, width="stretch",
         column_config={
             "numero": "Nº factura", "fecha": st.column_config.DateColumn("Fecha", format="DD/MM/YYYY"),
             "emisor": "Emisor", "nif_emisor": "NIF", "tipo_iva": "IVA %",
             "base": st.column_config.NumberColumn("Base", format="%.2f €"),
             "cuota_iva": st.column_config.NumberColumn("Cuota IVA", format="%.2f €"),
-            "total": st.column_config.NumberColumn("Total", format="%.2f €"), "fichero": "Fichero",
+            "total": st.column_config.NumberColumn("Total", format="%.2f €"), "lectura": "Lectura", "fichero": "Fichero",
         })
 
 with pest_revision:
     if revision.empty:
         st.success("No hay facturas pendientes de revisión.")
     for _, f in revision.iterrows():
-        with st.expander(f"⚠ {f['fichero']} — {f['emisor'] or 'emisor desconocido'}"):
+        with st.expander(f"{f['fichero']} — {f['emisor'] or 'emisor desconocido'}"):
             for motivo in f["incidencias"]:
                 st.write(f"- {motivo}")
             st.caption(f"El PDF está en {rutas.revision / f['fichero']}")
@@ -112,5 +113,5 @@ with pest_graficos:
             st.bar_chart(validas.groupby(validas["fecha"].dt.strftime("%Y-%m"))["total"].sum())
 
 informe = generar_informe(facturas, RAIZ / "informes" / "facturas.xlsx")
-st.download_button("⬇ Descargar informe Excel", informe.read_bytes(), file_name="facturas.xlsx",
+st.download_button("Descargar informe Excel", informe.read_bytes(), file_name="facturas.xlsx",
                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")

@@ -172,7 +172,16 @@ def generar(carpeta: Path) -> list[Path]:
         ruta = carpeta / nombre
         doc.save(ruta)
         creados.append(ruta)
-    escaneada(carpeta / "02_papeleria_correcta.pdf", carpeta / "09_escaneada.pdf")
+    # Factura en papel escaneada (una imagen, sin texto): solo se puede leer con OCR
+    material = [("Bolígrafos azules (caja 50)", 6, "11.90"), ("Cuadernos A5 tapa dura", 30, "3.25"),
+                ("Grapadora de sobremesa", 4, "14.60")]
+    original = carpeta / "_original_escaneada.pdf"
+    doc = pymupdf.open()
+    formato_b(doc, "2026/131", "11 de noviembre de 2026", "papeleria", material, tipo=21)
+    doc.save(original)
+    doc.close()
+    escaneada(original, carpeta / "09_escaneada.pdf")
+    original.unlink()
     creados.append(carpeta / "09_escaneada.pdf")
     return creados
 
