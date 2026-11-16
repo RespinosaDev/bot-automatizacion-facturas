@@ -1,0 +1,8 @@
+[server]
+headless = true
+port = 8501
+# Solo accesible desde este ordenador
+address = "localhost"
+
+[browser]
+gatherUsageStats = false

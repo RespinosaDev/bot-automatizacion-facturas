@@ -1,0 +1,3 @@
+Inter (Rasmus Andersson) — SIL Open Font License 1.1
+https://github.com/rsms/inter
+Se usa solo para dibujar las facturas de ejemplo (incluye el símbolo del euro).
