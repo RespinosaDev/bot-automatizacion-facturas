@@ -122,7 +122,16 @@ tests/              # pytest
 python -m pytest
 ```
 
-Hay **46 tests**: validación de NIF/NIE/CIF, cálculo de importes, extracción de los tres formatos de factura, OCR de la factura escaneada y el flujo completo sobre las facturas de ejemplo (clasificación, movimiento de ficheros, duplicados e informe). Se ejecutan en cada *push* con **GitHub Actions**.
+Hay **46 tests**: validación de NIF/NIE/CIF, cálculo de importes, extracción de los tres formatos de factura, OCR de la factura escaneada y el flujo completo sobre las facturas de ejemplo (clasificación, movimiento de ficheros, duplicados e informe). Cubren el **81 %** del código; los módulos de validación, almacenamiento e informe llegan al 97-100 %. Se ejecutan en cada *push* con **GitHub Actions**.
+
+## Rendimiento
+
+El flujo completo (lectura, extracción, validación, registro en SQLite y movimiento del fichero), medido en un portátil:
+
+| Tipo de factura | Velocidad |
+|---|---|
+| PDF con texto | más de 100 facturas por segundo (400 en unos 3,5 s) |
+| PDF escaneado (OCR a 300 ppp) | unos 0,8 s por factura |
 
 Las facturas de ejemplo son **ficticias**: empresas y NIF inventados, con dígitos de control calculados para que sean válidos, salvo en el caso que prueba un CIF incorrecto.
 
